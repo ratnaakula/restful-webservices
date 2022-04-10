@@ -36,7 +36,7 @@ public class UserController {
         return model;
     }
 
-    @PostMapping("/user")
+    @PostMapping("/users")
     public User findUser(@Valid @RequestBody User user) {
         return userDaoService.save(user);
     }
