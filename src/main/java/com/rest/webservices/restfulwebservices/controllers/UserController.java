@@ -4,10 +4,14 @@ import com.rest.webservices.restfulwebservices.beans.User;
 import com.rest.webservices.restfulwebservices.exceptions.UserNotFoundException;
 import com.rest.webservices.restfulwebservices.services.UserDaoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @RestController
 public class UserController {
@@ -21,12 +25,15 @@ public class UserController {
     }
 
     @GetMapping("/users/{id}")
-    public User findUser(@PathVariable Integer id) {
+    public EntityModel<User> findUser(@PathVariable Integer id) {
         User user = userDaoService.findUser(id);
         if (null == user) {
             throw new UserNotFoundException("id_" + id);
         }
-        return user;
+        EntityModel<User> model = EntityModel.of(user);
+        WebMvcLinkBuilder linkToUsers = linkTo(methodOn(this.getClass()).findUsers());
+        model.add(linkToUsers.withRel("all-users"));
+        return model;
     }
 
     @PostMapping("/user")
@@ -36,8 +43,7 @@ public class UserController {
 
     @DeleteMapping("/users/{id}")
     public List<User> deleteUser(@PathVariable Integer id) {
-        List<User> user = userDaoService.deleteUser(id);
-        return user;
+        return userDaoService.deleteUser(id);
     }
 
 
